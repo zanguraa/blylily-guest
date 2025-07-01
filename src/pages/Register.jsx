@@ -8,21 +8,25 @@ import StepProgressBar from "../components/StepProgressBar";
 
 const Register = () => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    profilePhoto: null,
-    email: "",
-    phone: "",
-    dateOfBirth: "",
-    gender: "",
-    address: {
-      country: "",
-      city: "",
-      street: "",
-      houseNumber: "",
-    },
-    firstName: "",
-    lastName: "",
-    socialLinks: [],
+
+  const [formData, setFormData] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem("guestProfile") || "{}");
+    return {
+      profilePhoto: saved.profilePhoto || null,
+      email: saved.email || "",
+      phone: saved.phone || "",
+      dateOfBirth: saved.dateOfBirth || "",
+      gender: saved.gender || "",
+      address: {
+        country: saved.address?.country || "",
+        city: saved.address?.city || "",
+        street: saved.address?.street || "",
+        houseNumber: saved.address?.houseNumber || "",
+      },
+      firstName: saved.firstName || "",
+      lastName: saved.lastName || "",
+      socialLinks: saved.socialLinks || [],
+    };
   });
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -43,6 +47,7 @@ const Register = () => {
           formData={formData}
           setFormData={setFormData}
           next={nextStep}
+          back={prevStep}
         />
       )}
       {step === 3 && (
@@ -50,6 +55,7 @@ const Register = () => {
           formData={formData}
           setFormData={setFormData}
           next={nextStep}
+          back={prevStep}
         />
       )}
       {step === 4 && (
@@ -57,6 +63,7 @@ const Register = () => {
           formData={formData}
           setFormData={setFormData}
           next={nextStep}
+          back={prevStep}
         />
       )}
       {step === 5 && <Step5Success formData={formData} />}

@@ -1,20 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const Step2ContactInfo = ({ formData, setFormData, next }) => {
+const Step2ContactInfo = ({ formData, setFormData, next, back }) => {
   const [error, setError] = useState("");
+
+  const saveToLocalStorage = (updated) => {
+    const existing = JSON.parse(localStorage.getItem("guestProfile") || "{}");
+    const merged = { ...existing, ...updated };
+    localStorage.setItem("guestProfile", JSON.stringify(merged));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (["country", "city", "street", "houseNumber"].includes(name)) {
+      const updatedAddress = {
+        ...formData.address,
+        [name]: value,
+      };
+
       setFormData((prev) => ({
         ...prev,
-        address: {
-          ...prev.address,
-          [name]: value,
-        },
+        address: updatedAddress,
       }));
+
+      saveToLocalStorage({ address: updatedAddress });
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      saveToLocalStorage({ [name]: value });
     }
   };
 
@@ -35,6 +51,22 @@ const Step2ContactInfo = ({ formData, setFormData, next }) => {
     setError("");
     next();
   };
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("guestProfile") || "{}");
+
+    setFormData((prev) => ({
+      ...prev,
+      email: saved.email || "",
+      phone: saved.phone || "",
+      dateOfBirth: saved.dateOfBirth || "",
+      gender: saved.gender || "",
+      address: {
+        ...prev.address,
+        ...saved.address,
+      },
+    }));
+  }, []);
 
   return (
     <div className="bg-white p-6 rounded shadow max-w-xl mx-auto">
@@ -119,12 +151,21 @@ const Step2ContactInfo = ({ formData, setFormData, next }) => {
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <button
-          onClick={handleVerify}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-4"
-        >
-          Verify
-        </button>
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={back}
+            className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
+          >
+            Back
+          </button>
+
+          <button
+            onClick={handleVerify}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Verify
+          </button>
+        </div>
       </div>
     </div>
   );

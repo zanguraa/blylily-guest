@@ -5,6 +5,14 @@ const Step5Success = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const guestProfile = JSON.parse(
+      localStorage.getItem("guestProfile") || "{}"
+    );
+
+    localStorage.setItem("completedProfile", JSON.stringify(guestProfile));
+
+    //localStorage.removeItem("guestProfile");
+
     const timer = setTimeout(() => {
       navigate("/profile");
     }, 3000);

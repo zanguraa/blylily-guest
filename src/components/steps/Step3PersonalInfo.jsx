@@ -1,15 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const Step3PersonalInfo = ({ formData, setFormData, next }) => {
+const Step3PersonalInfo = ({ formData, setFormData, next, back }) => {
   const [error, setError] = useState("");
+
+  const saveToLocalStorage = (updated) => {
+    const existing = JSON.parse(localStorage.getItem("guestProfile") || "{}");
+    const merged = { ...existing, ...updated };
+    localStorage.setItem("guestProfile", JSON.stringify(merged));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    saveToLocalStorage({ [name]: value });
   };
 
   const handleNext = () => {
     const { firstName, lastName, dateOfBirth, gender } = formData;
+
     if (!firstName || !lastName || !dateOfBirth || !gender) {
       setError("Please fill in all required fields");
       return;
@@ -18,6 +31,20 @@ const Step3PersonalInfo = ({ formData, setFormData, next }) => {
     setError("");
     next();
   };
+
+  // 📥 დაბრუნებისას localStorage-დან წამოღება
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("guestProfile") || "{}");
+    const { firstName, lastName, dateOfBirth, gender } = saved;
+
+    setFormData((prev) => ({
+      ...prev,
+      firstName: firstName || "",
+      lastName: lastName || "",
+      dateOfBirth: dateOfBirth || "",
+      gender: gender || "",
+    }));
+  }, []);
 
   return (
     <div className="bg-white p-6 rounded shadow max-w-md mx-auto">
@@ -65,12 +92,21 @@ const Step3PersonalInfo = ({ formData, setFormData, next }) => {
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <button
-          onClick={handleNext}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-4"
-        >
-          Next
-        </button>
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={back}
+            className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
+          >
+            Back
+          </button>
+
+          <button
+            onClick={handleNext}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
